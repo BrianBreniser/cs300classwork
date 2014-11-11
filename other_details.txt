@@ -1,0 +1,27 @@
+Basic entry (keeping track of a service provided)
+    1: take in a member number
+    2: return VALIDATED if found
+    3: Take in date MM-DD-YYYY
+    4: Take in service code
+    5: display name of service found from code entered ||| error if not correct entered
+    6: Ask for verification
+    7: Enter optional comments
+    8: Save
+    9: Display payment
+    10: providor keeps track manually for software verification
+
+Anytime:
+    Ask for providor directiory
+      - Alphabetic names, service codes, fees
+      - Sent via email (we can just display)
+
+On Fridays at midnight (or run manually):
+     Query list of services
+     create reports:
+        Member report: Serivces they were provided, sorted in order of service provided
+        Providor report: List of services they provided
+        Summary report: Every providor, Number of consultations, total fee for week && total number of providors who provided; total consultations; ovarall fee total
+
+"Day Mode": interacgtive
+    add del mod customer
+    add del mod providor
