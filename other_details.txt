@@ -8,20 +8,45 @@ Basic entry (keeping track of a service provided)
     7: Enter optional comments
     8: Save
     9: Display payment
-    10: providor keeps track manually for software verification
+    10: provider keeps track manually for software verification
 
 Anytime:
-    Ask for providor directiory
+    Ask for provider directory
       - Alphabetic names, service codes, fees
       - Sent via email (we can just display)
 
 On Fridays at midnight (or run manually):
      Query list of services
      create reports:
-        Member report: Serivces they were provided, sorted in order of service provided
-        Providor report: List of services they provided
-        Summary report: Every providor, Number of consultations, total fee for week && total number of providors who provided; total consultations; ovarall fee total
+        Member report: Services they were provided, sorted in order of service provided
+        provider report: List of services they provided
+        Summary report: Every provider, Number of consultations, total fee for week && total number of providers who provided; total consultations; ovarall fee total
 
-"Day Mode": interacgtive
+"Day Mode": interactive
     add del mod customer
-    add del mod providor
+    add del mod provider
+
+
+Functions:
+    Customer/Member
+        display
+        add
+        delete
+        delete all
+        modify
+    provider
+        display
+        add
+        delete
+        delete all
+        modify
+    Service
+        add service
+        Display
+        delete
+        delete all
+    Generate (each will be it's own file)
+        Services for week
+        Member report
+        Provider report
+        Summary report
