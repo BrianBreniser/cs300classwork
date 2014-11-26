@@ -1,7 +1,7 @@
-#! /usr/bin/env python
+"""the business logic for Choc-An system."""
 
 from json import load, dump
-from os import remove, path
+from os import path
 
 
 class v(object):
@@ -9,15 +9,6 @@ class v(object):
     """standard variables used in this program."""
 
     memberlist = "memberlist.json"
-
-
-class customers(object):
-
-    """a list of customers."""
-
-    def addcustomer(self):
-        """my docstring."""
-        return "hello world"
 
 
 class member(object):
@@ -50,3 +41,23 @@ class member(object):
         memberlist.append(listitem)
         dump(memberlist, fp)
         fp.close()
+
+    def display(self):
+        """display all members of the choc-an members list."""
+        if not path.exists(v.memberlist):
+            print "There is no member file! Try adding members first!"
+        else:
+            fp = open(v.memberslist, 'rb')
+
+            try:
+                displaylist = load(fp)
+            except ValueError:
+                print "There are no members to display currently, Try adding members first!"
+            else:
+                for m in displaylist:
+                    print m["name"]
+                    print m["number"]
+                    print m["address"]
+                    print m["city"]
+                    print m["state"]
+                    print m["zip"]
