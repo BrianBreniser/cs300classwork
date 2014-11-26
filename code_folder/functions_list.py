@@ -1,7 +1,7 @@
 """the business logic for Choc-An system."""
 
 from json import load, dump
-from os import path
+from os import path, remove
 
 
 class v(object):
@@ -9,6 +9,8 @@ class v(object):
     """standard variables used in this program."""
 
     memberlist = "memberlist.json"
+    memberfileerror = "There is no member file! Try adding members first!"
+    displayerror = "There are no members to display currently, Try adding members first!"
 
 
 class member(object):
@@ -35,29 +37,42 @@ class member(object):
             memberlist = list()
         except:
             print "unhandled exception occured"
+            return 0
 
         fp.close()
         fp = open(v.memberlist, 'w+b')
         memberlist.append(listitem)
         dump(memberlist, fp)
         fp.close()
+        return True
 
     def display(self):
         """display all members of the choc-an members list."""
         if not path.exists(v.memberlist):
-            print "There is no member file! Try adding members first!"
+            return v.memberfileerror
         else:
-            fp = open(v.memberslist, 'rb')
+            fp = open(v.memberlist, 'rb')
 
             try:
                 displaylist = load(fp)
             except ValueError:
-                print "There are no members to display currently, Try adding members first!"
+                return v.displayerror
             else:
+                print ""
                 for m in displaylist:
                     print m["name"]
-                    print m["number"]
-                    print m["address"]
-                    print m["city"]
-                    print m["state"]
-                    print m["zip"]
+                    print "    " + m["number"]
+                    print "    " + m["address"]
+                    print "    " + m["city"]
+                    print "    " + m["state"]
+                    print "    " + m["zip"]
+                    print ""
+        return True
+
+    def deleteall(self):
+        if path.exists(v.memberlist):
+            remove(v.memberlist)
+
+        fp = open(v.memberlist, 'w+b')
+        fp.close()
+        return True
