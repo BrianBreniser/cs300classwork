@@ -6,25 +6,35 @@ from os import path, remove
 
 class v(object):
 
-    """standard variables used in this program."""
+    """standard variables and error messages used in this program."""
 
     memberlist = "memberlist.json"
-    memberfileerror = "There is no member file! Try adding members first!"
-    displayerror = "There are no members to display currently, Try adding members first!"
+    memberfileerror = "memberfileerror"
+    displayerror = "displayerror"
+    memberalreadyfound = "memberalreadyfound"
+    missingdata = "missingdata"
+    toolongdata = "toolongdata"
 
 
 class member(object):
 
     """a member of the choc-an system."""
 
-    def addmember(self, name=None, number=None, address=None, city=None, state=None, zip=None):
+    def addmember(self, name=None, number=None, address=None, city=None, state=None, zipcode=None):
         """add a member to the members file, creates the file if it does not exist."""
+
+        if name is None or number is None or address is None or city is None or state is None or zipcode is None:
+            return v.missingdata
+
+        if len(name) > 25 or len(number) > 9 or len(address) > 25 or len(city) > 14 or len(state) > 2 or len(zipcode) > 5:
+            return v.toolongdata
+
         listitem = {"name": name,
                     "number": number,
                     "address": address,
                     "city": city,
                     "state": state,
-                    "zip": zip}
+                    "zipcode": zipcode}
 
         if not path.exists(v.memberlist):
             fp = open(v.memberlist, 'w+b')
@@ -38,6 +48,11 @@ class member(object):
         except:
             print "unhandled exception occured"
             return 0
+
+        # Got to check t osee if we already have this member (number) in our system
+        for m in memberlist:
+            if m["number"] == number:
+                return v.memberalreadyfound
 
         fp.close()
         fp = open(v.memberlist, 'w+b')
@@ -65,11 +80,12 @@ class member(object):
                     print "    " + m["address"]
                     print "    " + m["city"]
                     print "    " + m["state"]
-                    print "    " + m["zip"]
+                    print "    " + m["zipcode"]
                     print ""
         return True
 
     def deleteall(self):
+        """ Delete the file and start with an empty one. """
         if path.exists(v.memberlist):
             remove(v.memberlist)
 

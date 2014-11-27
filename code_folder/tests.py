@@ -14,7 +14,7 @@ def addmembertest():
         remove(f.v.memberlist)
 
     # test to see if adding from empty list works
-    assert f.member().addmember(name="joe", number="0123456789", address="101 n whatever street", city="portland", state="OR", zip="912345") == True
+    assert f.member().addmember(name="joe", number="12345678", address="101 n whatever street", city="portland", state="OR", zipcode="12345") is True
     fp = open(f.v.memberlist, 'rb')
     try:
         mylist = load(fp)
@@ -22,15 +22,15 @@ def addmembertest():
         print "load failed"
 
     assert mylist[0]["name"] == "joe"
-    assert mylist[0]["number"] == "0123456789"
+    assert mylist[0]["number"] == "12345678"
     assert mylist[0]["address"] == "101 n whatever street"
     assert mylist[0]["city"] == "portland"
     assert mylist[0]["state"] == "OR"
-    assert mylist[0]["zip"] == "912345"
+    assert mylist[0]["zipcode"] == "12345"
 
     # test to see if addine a second one works
 
-    assert f.member().addmember(name="jeff", number="987654321", address="you better get this right", city="greshem", state="why not", zip="74635273849") == True
+    assert f.member().addmember(name="jeff", number="123456", address="new address", city="greshem", state="WA", zipcode="543") is True
     fp = open(f.v.memberlist, 'rb')
     try:
         mylist = load(fp)
@@ -38,13 +38,19 @@ def addmembertest():
         print "load failed"
 
     assert mylist[1]["name"] == "jeff"
-    assert mylist[1]["number"] == "987654321"
-    assert mylist[1]["address"] == "you better get this right"
+    assert mylist[1]["number"] == "123456"
+    assert mylist[1]["address"] == "new address"
     assert mylist[1]["city"] == "greshem"
-    assert mylist[1]["state"] == "why not"
-    assert mylist[1]["zip"] == "74635273849"
+    assert mylist[1]["state"] == "WA"
+    assert mylist[1]["zipcode"] == "543"
 
-    # clean up after tes
+    assert f.member().addmember(name="bob", number="123456", address="bob", city="bob", state="OR", zipcode="bob") is f.v.memberalreadyfound
+
+    assert f.member().addmember(name="bob", address="bob", city="bob", state="OR", zipcode="bob") is f.v.missingdata
+
+    assert f.member().addmember(name="bob", number="1234567890", address="bob", city="bob", state="OR", zipcode="bob") is f.v.toolongdata
+
+    # clean up after test
     if path.exists(f.v.memberlist):
         remove(f.v.memberlist)
 
@@ -58,15 +64,15 @@ def displaymembertest():
     fp.close()  # close 'cuz we don't really need it
     assert f.member().display() == f.v.displayerror
     # commented out display test since I don't want to see it every time, uncomment to test
-    # f.member().addmember(name="joe", number="0123456789", address="101 n whatever street", city="portland", state="OR", zip="912345")
-    # f.member().addmember(name="jeff", number="987654321", address="you better get this right", city="greshem", state="why not", zip="74635273849")
+    # f.member().addmember(name="joe", number="12345678", address="101 n whatever street", city="portland", state="OR", zipcode="12345")
+    # f.member().addmember(name="jeff", number="9876543", address="new address", city="greshem", state="WA", zipcode="543")
     # assert f.member().display() == True
 
 
 def deletealltest():
     """ test delete all funciton. """
-    f.member().addmember(name="joe", number="0123456789", address="101 n whatever street", city="portland", state="OR", zip="912345")
-    f.member().addmember(name="jeff", number="987654321", address="you better get this right", city="greshem", state="why not", zip="74635273849")
+    f.member().addmember(name="joe", number="12345678", address="101 n whatever street", city="portland", state="OR", zipcode="12345")
+    f.member().addmember(name="jeff", number="9876543", address="new address", city="greshem", state="WA", zipcode="543")
     assert f.member().deleteall() is True
     assert f.member().display() is f.v.displayerror
 
