@@ -342,7 +342,7 @@ def addoneservicetest():
 
     assert mylist[0]["name"] == "massage"
     assert mylist[0]["code"] == 12345678
-    assert mylist[0]["fee"] == 400.00
+    assert mylist[0]["fee"] == "400"
 
     # test to see if addine a second one works
 
@@ -355,13 +355,13 @@ def addoneservicetest():
 
     assert mylist[1]["name"] == "jeff"
     assert mylist[1]["code"] == 123456
-    assert mylist[1]["fee"] == 543
+    assert mylist[1]["fee"] == "543"
 
     assert f.service().addone(name="bob", code=123456, fee=123) is f.v.alreadyfound
 
     assert f.service().addone(name="bob") is f.v.missingdata
 
-    assert f.service().addone(name="bob", fee=1234) is f.v.toolongdata
+    assert f.service().addone(name="bob", code=121212, fee=1234345677) is f.v.toolongdata
 
     # clean up after test
     if path.exists(f.v.servicelist):
@@ -400,9 +400,10 @@ def deleteallservicetest():
 
 def deleteoneservicetest():
     """ test delete one service function. """
-    f.service().addone(name="massage", fee=400.00)
-    f.service().addone(name="jeff", fee=543)
-    f.service().addone(name="jeff", fee=543)
+    f.service().addone(name="massage", code=12345678, fee=400.00)
+    f.service().addone(name="jeff", code=9876543, fee=543)
+    f.service().addone(name="jeff", code=6496743, fee=543)
+
     assert f.service().deleteone(9876543) is True
     assert f.service().deleteone("1029384") is f.v.nonefound
     assert f.service().deleteone(None) is f.v.missingdata
@@ -415,11 +416,11 @@ def deleteoneservicetest():
 
     assert mylist[0]["name"] == "massage"
     assert mylist[0]["code"] == 12345678
-    assert mylist[0]["fee"] == 400.00
+    assert mylist[0]["fee"] == "400"
 
     assert mylist[1]["name"] == "jeff"
     assert mylist[1]["code"] == 6496743
-    assert mylist[1]["fee"] == 543
+    assert mylist[1]["fee"] == "543"
 
     # clean up after test
     if path.exists(f.v.servicelist):
@@ -432,12 +433,12 @@ def modifyoneservicetest():
     f.service().addone(name="jeff", code=6496743, fee=543)
     f.service().addone(name="mark", code=12345610, fee=400.00)
 
-    assert f.service().modifyone(code=12345678) is True
+    assert f.service().modifyone(code=12345678, fee=120) is True
     assert f.service().modifyone(code=6496743, name="foobar") is True
-    assert f.service().modifyone(code=12345610, name="mark0", fee=200.00) is True
+    assert f.service().modifyone(code=12345610, name="mark0", fee=200) is True
 
-    assert f.service().modifyone(code=1234569, name="mark", state="WA") is f.v.nonefound
-    assert f.service().modifyone(code=None, name="sarah", state="NY") is f.v.missingdata
+    assert f.service().modifyone(code=1234569, name="mark") is f.v.nonefound
+    assert f.service().modifyone(code=None, name="sarah") is f.v.missingdata
 
     fp = open(f.v.servicelist, 'rb')
     try:
@@ -447,15 +448,15 @@ def modifyoneservicetest():
 
     assert mylist[0]["name"] == "massage"
     assert mylist[0]["code"] == 12345678
-    assert mylist[0]["fee"] == 400.00
+    assert mylist[0]["fee"] == "120"
 
     assert mylist[1]["name"] == "foobar"
     assert mylist[1]["code"] == 6496743
-    assert mylist[1]["fee"] == 543
+    assert mylist[1]["fee"] == "543"
 
     assert mylist[2]["name"] == "mark0"
     assert mylist[2]["code"] == 12345610
-    assert mylist[2]["fee"] == 200.00
+    assert mylist[2]["fee"] == "200"
 
     # clean up after test
     if path.exists(f.v.servicelist):

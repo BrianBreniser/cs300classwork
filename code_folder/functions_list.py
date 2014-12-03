@@ -362,7 +362,7 @@ class service(object):
             return v.typeerror
 
         # Check for length attributes
-        if len(name) > 25 or len(str(code)) > 9 or 0 > fee > 999.99:
+        if len(name) > 25 or len(str(code)) > 9 or (0 > decimal.Decimal(fee) or decimal.Decimal(fee) > 999.99):
             return v.toolongdata
 
         # Prep our list item to be added to file
@@ -441,6 +441,10 @@ class service(object):
         if code is None:
             return v.missingdata
 
+        # make fee forced to Decimal if it exists
+        if fee is not None:
+            fee = decimal.Decimal(fee)
+
         fulllist = h().checkfileandreturnlist(filename=v.servicelist)
         if fulllist is False:
             return False
@@ -452,8 +456,8 @@ class service(object):
                 # For each item, if we passed in data, update the list
                 if name is not None and type(name) is str and len(name) <= 25:
                     m["name"] = name
-                if fee is not None and type(fee) is decimal.Decimal and 0 < fee < 999.99:
-                    m["fee"] = fee
+                if fee is not None and type(fee) is decimal.Decimal and 0 <= decimal.Decimal(fee) and decimal.Decimal(fee) <= 999.99:
+                    m["fee"] = str(fee)
 
                 # return true if writing was good, false if writing failed
                 return h().writedatatofile(filename=v.servicelist, data=fulllist)
