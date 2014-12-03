@@ -3,6 +3,7 @@
 from json import load, dump
 from os import path, remove
 import decimal as decimal
+import datetime as dt
 
 
 class v(object):
@@ -12,6 +13,7 @@ class v(object):
     memberlist = "memberlist.json"
     providerlist = "providerlist.json"
     servicelist = "servicelist.json"
+    weekservicelist = "weekservicelist"
     fileerror = "fileerror"
     displayerror = "displayerror"
     alreadyfound = "alreadyfound"
@@ -464,3 +466,155 @@ class service(object):
 
         # If we made it here, we didn't find the item
         return v.nonefound
+
+
+class weeklyservices(object):
+
+    """a service of the choc-an system."""
+
+    def addone(self, dmonth=None, dday=None, dyear=None, pnumber=None, mnumber=None, code=None, comments=None):
+        """add a service to the services file, creates the file if it does not exist."""
+        # Check for non-entered data
+        if dmonth is None or dday is None or dyear is None or pnumber is None or mnumber is None or code is None or comments is None:
+            return v.missingdata
+
+        # Check for correct data types
+        if type(dmonth) is not int:
+            return v.typeerror
+        if type(dday) is not int:
+            return v.typeerror
+        if type(dyear) is not int:
+            return v.typeerror
+        if type(pnumber) is not int:
+            return v.typeerror
+        if type(mnumber) is not int:
+            return v.typeerror
+        if type(code) is not int:
+            return v.typeerror
+        if type(comments) is not str:
+            return v.typeerror
+
+        # Check for length and size attributes
+        if (dmonth > 12 or
+                len(str(dmonth)) < 2 or
+                dday > 31 or
+                len(str(dday)) < 2 or
+                dyear > int(str(dt.datetime.now())[0:10].split('-')[0]) or
+                len(str(dyear)) < 4 or
+                len(str(pnumber)) > 9 or
+                len(str(mnumber)) > 9 or
+                len(str(code)) > 6 or
+                len(str(comments)) > 100):
+            return v.toolongdata
+
+        # set todays date with correct syntax
+        currentdate = "{0}-{1}-{2}".format(dmonth, dday, dyear)
+
+        # set date of service with correct syntax
+        datelist = str(dt.datetime.now()).split()[0].split('-')
+        cyear, cmonth, cday = datelist[0], datelist[1], datelist[2]
+        timelist = str(dt.datetime.now()).split()[1].split('-')
+        chour, cmin, csec = timelist[0], timelist[1], timelist[2][0:2]
+        dateofservice = "{0}-{1}-{2} {3}:{4}:{5}".format(cmonth, cday, cyear, chour, cmin, csec)
+
+        # Prep our list item to be added to file
+        listitem = {"currentdate": currentdate,
+                    "dateofservice": dateofservice,
+                    "pnumber": pnumber,
+                    "mnumber": mnumber,
+                    "code": code,
+                    "comments": comments}
+
+        fulllist = h().checkfileandreturnlist(filename=v.weekservicelist)
+        if fulllist is False:
+            return False
+
+        # Nothing else to check, append to list
+        fulllist.append(listitem)
+
+        # write to file
+        return h().writedatatofile(filename=v.weekservicelist, data=fulllist)
+
+    def display(self):
+        """display all services of the choc-an services list."""
+        if not path.exists(v.weekservicelist):
+            return v.fileerror
+        else:
+            fp = open(v.weekservicelist, 'rb')
+
+            try:
+                displaylist = load(fp)
+            except ValueError:
+                return v.displayerror
+            else:
+                print ""
+                for m in displaylist:
+                    print m["currentdate"]
+                    print m["dateofservice"]
+                    print m["pnumber"]
+                    print m["mnumber"]
+                    print m["code"]
+                    print m["comments"]
+                    print ""
+        return True
+
+    def deleteall(self):
+        """ Delete the file and start with an empty one. """
+        if path.exists(v.weekservicelist):
+            remove(v.weekservicelist)
+
+        fp = open(v.weekservicelist, 'w+b')
+        fp.close()
+        return True
+
+    # def deleteone(self, code=None):
+    #     """Delete only a single service by service number."""
+    # If no data was passed in, don't do anything
+    #     if code is None:
+    #         return v.missingdata
+
+    #     fulllist = h().checkfileandreturnlist(filename=v.weekservicelist)
+    #     if fulllist is False:
+    #         return False
+
+    # Check to see if service number is in the list
+    #     for m in fulllist:
+    #         if m["code"] == code:
+    # we found it! Remove it from the list!
+    #             fulllist.remove(m)
+
+    # return true if writing was good, false if writing failed
+    #             return h().writedatatofile(filename=v.weekservicelist, data=fulllist)
+
+    # If we made it here, we didn't find the item
+    #     return v.nonefound
+
+    # def modifyone(self, name=None, code=None, fee=None):
+    #     """modify a service by searching for service number and overwriting other fields entered."""
+    # If we didn't give a service number, we don't know what to change
+    #     if code is None:
+    #         return v.missingdata
+
+    # make fee forced to Decimal if it exists
+    #     if fee is not None:
+    #         fee = decimal.Decimal(fee)
+
+    #     fulllist = h().checkfileandreturnlist(filename=v.weekservicelist)
+    #     if fulllist is False:
+    #         return False
+
+    # Check to see if service number is in the list
+    #     for m in fulllist:
+    #         if m["code"] == code:
+    # we found it! Start changin data
+    # For each item, if we passed in data, update the list
+    #             if name is not None and type(name) is str and len(name) <= 25:
+    #                 m["name"] = name
+    #             if fee is not None and type(fee) is decimal.Decimal and 0 <= decimal.Decimal(fee) and decimal.Decimal(fee) <= 999.99:
+    #                 m["fee"] = str(fee)
+
+    # return true if writing was good, false if writing failed
+    #             return h().writedatatofile(filename=v.weekservicelist, data=fulllist)
+
+    # If we made it here, we didn't find the item
+    #     return v.nonefound
