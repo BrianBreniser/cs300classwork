@@ -21,6 +21,7 @@ class v(object):
     toolongdata = "toolongdata"
     nonefound = "nonefound"
     typeerror = "typeerror"
+    pmcnotfound = "pmcnotfound"
 
 
 class h(object):
@@ -499,7 +500,7 @@ class weeklyservices(object):
                 len(str(dmonth)) < 2 or
                 dday > 31 or
                 len(str(dday)) < 2 or
-                dyear > int(str(dt.datetime.now())[0:10].split('-')[0]) or
+                dyear > int(str(dt.datetime.now())[0:10].split('-')[0]) or  # if the year enteres is later (future) than the current year
                 len(str(dyear)) < 4 or
                 len(str(pnumber)) > 9 or
                 len(str(mnumber)) > 9 or
@@ -507,15 +508,49 @@ class weeklyservices(object):
                 len(str(comments)) > 100):
             return v.toolongdata
 
+        # Open the other databases since we have to check if our data exists in there
+        providerlist = h().checkfileandreturnlist(filename=v.providerlist)
+        if providerlist is False:
+            return False
+        memberlist = h().checkfileandreturnlist(filename=v.memberlist)
+        if memberlist is False:
+            return False
+        servicelist = h().checkfileandreturnlist(filename=v.servicelist)
+        if servicelist is False:
+            return False
+
+        # Check for existance of provider, member, and services in respective lists
+        pexists, mexists, cexists = 0, 0, 0  # initiate some "exists" variables to 0, change to 1 if we find them
+        for i in providerlist:
+            if pnumber == i["number"]:
+                pexists = 1
+
+        for i in memberlist:
+            if mnumber == i["number"]:
+                mexists = 1
+
+        for i in servicelist:
+            if code == i["code"]:
+                cexists = 1
+
+        # return error if we didn't find 1 or more distinguishing numbers in our files
+        if pexists == 0 or mexists == 0 or cexists == 0:
+            return v.pmcnotfound
+
         # set todays date with correct syntax
-        currentdate = "{0}-{1}-{2}".format(dmonth, dday, dyear)
+        dateofservice = "{0}-{1}-{2}".format(dmonth, dday, dyear)
 
         # set date of service with correct syntax
+        # split up date of now
         datelist = str(dt.datetime.now()).split()[0].split('-')
+        # assign date to vars
         cyear, cmonth, cday = datelist[0], datelist[1], datelist[2]
-        timelist = str(dt.datetime.now()).split()[1].split('-')
+        # split up the time var by colon ":"
+        timelist = str(dt.datetime.now()).split()[1].split(':')
+        # Assign time vars
         chour, cmin, csec = timelist[0], timelist[1], timelist[2][0:2]
-        dateofservice = "{0}-{1}-{2} {3}:{4}:{5}".format(cmonth, cday, cyear, chour, cmin, csec)
+        # put in format I want
+        currentdate = "{0}-{1}-{2} {3}:{4}:{5}".format(cmonth, cday, cyear, chour, cmin, csec)
 
         # Prep our list item to be added to file
         listitem = {"currentdate": currentdate,
@@ -618,3 +653,103 @@ class weeklyservices(object):
 
     # If we made it here, we didn't find the item
     #     return v.nonefound
+
+
+class report(object):
+
+    """report functions for member, provider, and summary."""
+
+    def memberreport():
+        """member report function, creates external json file with report."""
+        # first things is first, load up the files we need
+        providerlist = h().checkfileandreturnlist(filename=v.providerlist)
+        if providerlist is False:
+            return False
+
+        memberlist = h().checkfileandreturnlist(filename=v.memberlist)
+        if memberlist is False:
+            return False
+
+        servicelist = h().checkfileandreturnlist(filename=v.servicelist)
+        if servicelist is False:
+            return False
+
+        weeklyserviceslist = h().checkfileandreturnlist(filename=v.weeklyserviceslist)
+        if weeklyserviceslist is False:
+            return False
+
+        for m in memberlist:
+            print "hello world"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def providerreport():
+        """providerreport function, creates external json file with report."""
+        # first things is first, load up the files we need
+        providerlist = h().checkfileandreturnlist(filename=v.providerlist)
+        if providerlist is False:
+            return False
+
+        memberlist = h().checkfileandreturnlist(filename=v.memberlist)
+        if memberlist is False:
+            return False
+
+        servicelist = h().checkfileandreturnlist(filename=v.servicelist)
+        if servicelist is False:
+            return False
+
+        weeklyserviceslist = h().checkfileandreturnlist(filename=v.weeklyserviceslist)
+        if weeklyserviceslist is False:
+            return False
+
+    def summaryreport():
+        """summary  report function, creates external json file with report."""
+        # first things is first, load up the files we need
+        providerlist = h().checkfileandreturnlist(filename=v.providerlist)
+        if providerlist is False:
+            return False
+
+        memberlist = h().checkfileandreturnlist(filename=v.memberlist)
+        if memberlist is False:
+            return False
+
+        servicelist = h().checkfileandreturnlist(filename=v.servicelist)
+        if servicelist is False:
+            return False
+
+        weeklyserviceslist = h().checkfileandreturnlist(filename=v.weeklyserviceslist)
+        if weeklyserviceslist is False:
+            return False
