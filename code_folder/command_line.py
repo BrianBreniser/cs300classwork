@@ -25,12 +25,16 @@ def intro():
                 (s)ervice
             (di)splay
                 (m)ember
-                (p)rovider
+                (p)roviderhe
                 (s)ervice
             (m)odify
                 (m)ember
                 (p)rovider
                 (s)ervice
+            (p)provide
+                (s)ervice
+                (di)splayallservicesprovided
+                (d)deleteallservices
             (r)unreports
             """
 
@@ -38,30 +42,31 @@ def intro():
 def commands():
     """The command list."""
     print """
-            add
-                members
-                providers
-                services
-            delete
-                members
-                providers
-                services
-            deleteall
-                members
-                providers
-                services
-            display
-                members
-                providers
-                services
-            modify
-                members
-                providers
-                services
-            create
-                memberreport
-                providerreport
-                servicereport
+            (a)dd
+                (m)ember
+                (p)rovider
+                (s)ervice
+            (d)elete
+                (m)ember
+                (p)rovider
+                (s)ervice
+            (de)leteall
+                (m)ember
+                (p)rovider
+                (s)ervice
+            (di)splay
+                (m)ember
+                (p)rovider
+                (s)ervice
+            (m)odify
+                (m)ember
+                (p)rovider
+                (s)ervice
+            (p)provide
+                (s)ervice
+                (di)splayallservicesprovided
+                (d)deleteallservices
+            (r)unreports
             """
 
 
@@ -240,6 +245,33 @@ def runreports():
         return return_code
 
 
+def provideservice():
+    """the add weeklyservices function of the choc_an system."""
+    dmonth = int(raw_input("please enter the month of the service provided today: "))
+    dday = int(raw_input("please enter the day of the service provided today: "))
+    dyear = int(raw_input("please enter the year of the service provided today: "))
+    pnumber = int(raw_input("please enter the number of the provider today: "))
+    mnumber = int(raw_input("please enter the number of the member today: "))
+    code = int(raw_input("please enter the code of the service provided today: "))
+    comments = raw_input("please enter any comments: ")
+    return_code = f.weeklyservice().addone(dmonth=dmonth, dday=dday, dyear=dyear, pnumber=pnumber, mnumber=mnumber, code=code, comments=comments)
+    if return_code is not True:
+        print return_code
+
+
+def displayprovidedservices():
+    """the display weekly services function of the choc_an system."""
+    if f.member().display() is f.v.displayerror:
+        print "there is no file to display the contents of yet, try adding some data to it first"
+
+
+def deleteprovidedservices():
+    """the delete all provider function of the choc_an system."""
+    return_code = f.provider().deleteall()
+    if return_code is not True:
+        print return_code
+
+
 def main():
     """The commands of the Choc_an system."""
     intro()
@@ -338,6 +370,21 @@ def main():
         elif command == "runreports" or command == "run" or command == "r":
             try:
                 runreports()
+            except:
+                print "something went wrong"
+        elif command == "provideservice" or command == "provide" or command == "ps":
+            try:
+                provideservice()
+            except:
+                print "something went wrong"
+        elif command == "displayprovidedservices" or command == "displayprovidedservice" or command == "pdi":
+            try:
+                displayprovidedservices()
+            except:
+                print "something went wrong"
+        elif command == "deleteprovidedservices" or command == "deleteprovidedservices" or command == "pd":
+            try:
+                deleteprovidedservices()
             except:
                 print "something went wrong"
         elif command == "exit" or command == "quit" or command == "q":
