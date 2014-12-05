@@ -4,6 +4,7 @@ from json import load, dump
 from os import path, remove
 import decimal as decimal
 import datetime as dt
+from pprint import pprint
 
 
 class v(object):
@@ -19,17 +20,17 @@ class v(object):
     # report files
     memberreportlist = "memberreportlist.json"
     providerreportlist = "memberreportlist.json"
-    summaryreportlist = "memberreportlist.json"
+    summaryreportlist = "summaryreportlist.json"
 
     # error codes
-    fileerror = "fileerror"
-    displayerror = "displayerror"
-    alreadyfound = "alreadyfound"
-    missingdata = "missingdata"
-    toolongdata = "toolongdata"
-    nonefound = "nonefound"
-    typeerror = "typeerror"
-    pmcnotfound = "pmcnotfound"
+    fileerror = "There was an unknown file error"
+    displayerror = "display error: no file found"
+    alreadyfound = "that object is already found"
+    missingdata = "You entered missing data"
+    toolongdata = "Some of your data is too long"
+    nonefound = "none was found"
+    typeerror = "you entered the wrong type of data"
+    pmcnotfound = "provider, member, or code numbers not found"
 
 
 class h(object):
@@ -670,8 +671,8 @@ class report(object):
     def memberreport(self):
         """member report function, creates external json file with report."""
         # Start clean, with an empty file before running each report
-        if path.exists(v.servicelist):
-            remove(v.servicelist)
+        if path.exists(v.memberreportlist):
+            remove(v.memberreportlist)
 
         # load up the files we will use
         providerlist = h().checkfileandreturnlist(filename=v.providerlist)
@@ -701,14 +702,10 @@ class report(object):
                     newservice = {}  # create a new service dict to fill info into
                     newservice["date of service"] = w["dateofservice"]  # and fill it with date of service
                     for p in providerlist:  # then find associated provider in providers list (from weekly service)
-                        print p["number"]
                         if w["pnumber"] == p["number"]:  # if found
                             newservice["provider name"] = p["name"]  # add their name
                             break  # we can stop looking now
                     for s in servicelist:  # we need the services name now too
-                        print s["code"]
-                        print s["name"]
-                        print s["fee"]
                         if w["code"] == s["code"]:  # so find the code
                             newservice["service name"] = s["name"]  # add its name
                             break  # we can stop looking now
@@ -716,12 +713,25 @@ class report(object):
                     continue  # keep looking, find ALL services for each member
         # ^^ holy shit I think we're done
 
+        # Check to see if we have any members without services for the week
+        for m in modifiedmemberlist:
+            if m["service list"] == []:
+                # we found it! Remove it from the list!
+                modifiedmemberlist.remove(m)
+
+        # pprint for minor debug issue
+        # pprint(modifiedmemberlist)
+
         # gotta write it to the file
         return h().writedatatofile(filename=v.memberreportlist, data=modifiedmemberlist)
 
     def providerreport(self):
         """providerreport function, creates external json file with report."""
-        # first things is first, load up the files we need
+        # Start clean, with an empty file before running each report
+        if path.exists(v.providerreportlist):
+            remove(v.providerreportlist)
+
+        # load up the files we will use
         providerlist = h().checkfileandreturnlist(filename=v.providerlist)
         if providerlist is False:
             return False
@@ -737,22 +747,86 @@ class report(object):
         weekservicelist = h().checkfileandreturnlist(filename=v.weekservicelist)
         if weekservicelist is False:
             return False
+
+        # create a copy of our provider list to make modifications
+        modifiedproviderlist = providerlist
+
+        # enter a loop to build the services each member got, and add that to our new services list
+        for p in modifiedproviderlist:  # loop through our member list
+            p["service list"] = []  # always add an initiated empty list to each member
+            p["total number of consultations"] = int(0)
+            p["total fee for week"] = decimal.Decimal(0)
+            for w in weekservicelist:  # loop through weekly services list
+                if w["pnumber"] == p["number"]:  # if we find one for our provider number, that means they provided a service this cycle
+                    p["total number of consultations"] += 1
+                    newservice = {}  # create a new service dict to fill info into
+                    newservice["date of service"] = w["dateofservice"]  # and fill it with date of service
+                    newservice["date and time of data recieved"] = w["currentdate"]  # also fill with date service entry was entered
+                    for m in memberlist:  # then find associated member in members list (from weekly service)
+                        if w["mnumber"] == m["number"]:  # if found
+                            newservice["member name"] = m["name"]  # add their name
+                            newservice["member number"] = m["number"]  # and their number
+                            break  # we can stop looking now
+                    for s in servicelist:  # we need the services name now too
+                        if w["code"] == s["code"]:  # so find the code
+                            newservice["service name"] = s["name"]  # add its name
+                            newservice["service fee"] = s["fee"]  # and the fee associated
+                            p["total fee for week"] = decimal.Decimal(p["total fee for week"]) + decimal.Decimal(s["fee"])
+                            break  # we can stop looking now
+                    p["total fee for week"] = str(p["total fee for week"])  # convert decimal to string since JSON doesnt like decimals
+                    p["service list"].append(newservice)  # we need to add this service to a running list of services for each provider
+                    continue  # keep looking, find ALL services for each provider
+        # ^^ holy shit I think we're done
+
+        # Check to see if we have any members without services for the week
+        for p in modifiedproviderlist:
+            if p["service list"] == []:
+                # we found it! Remove it from the list!
+                modifiedproviderlist.remove(p)
+
+        # gotta write it to the file
+        return h().writedatatofile(filename=v.memberreportlist, data=modifiedproviderlist)
 
     def summaryreport(self):
         """summary  report function, creates external json file with report."""
-        # first things is first, load up the files we need
-        providerlist = h().checkfileandreturnlist(filename=v.providerlist)
-        if providerlist is False:
+        # Start clean, with an empty file before running each report
+        if path.exists(v.summaryreportlist):
+            remove(v.summaryreportlist)
+
+        # run the other reports first
+        report().memberreport()
+        report().providerreport()
+
+        # load up the report files
+        providerreportlist = h().checkfileandreturnlist(filename=v.providerreportlist)
+        if providerreportlist is False:
             return False
 
-        memberlist = h().checkfileandreturnlist(filename=v.memberlist)
-        if memberlist is False:
-            return False
+        # initate a new empty list we will eventually write to summary report JSON file
+        summaryreportlist = []
 
-        servicelist = h().checkfileandreturnlist(filename=v.servicelist)
-        if servicelist is False:
-            return False
+        # initiate a dict with initial summary data
+        summaryreportlist.append({})
+        summaryreportlist[0]["total number of providers who provided services"] = 0
+        summaryreportlist[0]["total number of consultations"] = 0
+        summaryreportlist[0]["total overall week fee"] = decimal.Decimal(0)
 
-        weekservicelist = h().checkfileandreturnlist(filename=v.weekservicelist)
-        if weekservicelist is False:
-            return False
+        # loop through the providerreportlist
+        for p in providerreportlist:
+            # add a subset of the provider report to our final report
+            additem = {}
+            additem["provider name"] = p["name"]
+            additem["number of consulations"] = p["total number of consultations"]
+            additem["total fee for week for this provider"] = p["total fee for week"]
+            summaryreportlist.append(additem)
+
+            # increment some counters of the first list items overall summary dictionary
+            summaryreportlist[0]["total number of providers who provided services"] += 1
+            summaryreportlist[0]["total number of consultations"] += int(p["total number of consultations"])
+            summaryreportlist[0]["total overall week fee"] = decimal.Decimal(summaryreportlist[0]["total overall week fee"]) + decimal.Decimal(p["total fee for week"])
+
+        # welp, JSON no like decimal, so gotta do this too
+        summaryreportlist[0]["total overall week fee"] = str(summaryreportlist[0]["total overall week fee"])
+
+        # gotta write it to the file
+        return h().writedatatofile(filename=v.summaryreportlist, data=summaryreportlist)

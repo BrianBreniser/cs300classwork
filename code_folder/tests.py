@@ -20,6 +20,7 @@ def addonemembertest():
         mylist = load(fp)
     except ValueError:
         print "load failed"
+    fp.close()
 
     assert mylist[0]["name"] == "joe"
     assert mylist[0]["number"] == 12345678
@@ -36,6 +37,7 @@ def addonemembertest():
         mylist = load(fp)
     except ValueError:
         print "load failed"
+    fp.close()
 
     assert mylist[1]["name"] == "jeff"
     assert mylist[1]["number"] == 123456
@@ -99,6 +101,7 @@ def deleteonemembertest():
         mylist = load(fp)
     except ValueError:
         print "load failed"
+    fp.close()
 
     assert mylist[0]["name"] == "joe"
     assert mylist[0]["number"] == 12345678
@@ -137,6 +140,7 @@ def modifyonemembertest():
         mylist = load(fp)
     except ValueError:
         print "load failed"
+    fp.close()
 
     assert mylist[0]["name"] == "joe"
     assert mylist[0]["number"] == 12345678
@@ -180,6 +184,7 @@ def addoneprovidertest():
         mylist = load(fp)
     except ValueError:
         print "load failed"
+    fp.close()
 
     assert mylist[0]["name"] == "joe"
     assert mylist[0]["number"] == 12345678
@@ -196,6 +201,7 @@ def addoneprovidertest():
         mylist = load(fp)
     except ValueError:
         print "load failed"
+    fp.close()
 
     assert mylist[1]["name"] == "jeff"
     assert mylist[1]["number"] == 123456
@@ -259,6 +265,7 @@ def deleteoneprovidertest():
         mylist = load(fp)
     except ValueError:
         print "load failed"
+    fp.close()
 
     assert mylist[0]["name"] == "joe"
     assert mylist[0]["number"] == 12345678
@@ -297,6 +304,7 @@ def modifyoneprovidertest():
         mylist = load(fp)
     except ValueError:
         print "load failed"
+    fp.close()
 
     assert mylist[0]["name"] == "joe"
     assert mylist[0]["number"] == 12345678
@@ -339,6 +347,7 @@ def addoneservicetest():
         mylist = load(fp)
     except ValueError:
         print "load failed"
+    fp.close()
 
     assert mylist[0]["name"] == "massage"
     assert mylist[0]["code"] == 12345678
@@ -352,6 +361,7 @@ def addoneservicetest():
         mylist = load(fp)
     except ValueError:
         print "load failed"
+    fp.close()
 
     assert mylist[1]["name"] == "jeff"
     assert mylist[1]["code"] == 123456
@@ -413,6 +423,7 @@ def deleteoneservicetest():
         mylist = load(fp)
     except ValueError:
         print "load failed"
+    fp.close()
 
     assert mylist[0]["name"] == "massage"
     assert mylist[0]["code"] == 12345678
@@ -445,6 +456,7 @@ def modifyoneservicetest():
         mylist = load(fp)
     except ValueError:
         print "load failed"
+    fp.close()
 
     assert mylist[0]["name"] == "massage"
     assert mylist[0]["code"] == 12345678
@@ -500,6 +512,7 @@ def addoneweeklyservicestest():
         mylist = load(fp)
     except ValueError:
         print "load failed"
+    fp.close()
 
     assert mylist[0]["dateofservice"] == "10-25-2014"
     assert mylist[0]["pnumber"] == 56789
@@ -515,6 +528,7 @@ def addoneweeklyservicestest():
         mylist = load(fp)
     except ValueError:
         print "load failed"
+    fp.close()
 
     assert mylist[1]["dateofservice"] == "10-26-2013"
     assert mylist[1]["pnumber"] == 98765
@@ -643,6 +657,105 @@ def deleteallweeklyservicestest():
 
 def memberreporttest():
     """Test the member report maker."""
+    # start clean
+    if path.exists(f.v.weekservicelist):
+        remove(f.v.weekservicelist)
+
+    if path.exists(f.v.servicelist):
+        remove(f.v.servicelist)
+
+    if path.exists(f.v.providerlist):
+        remove(f.v.providerlist)
+
+    if path.exists(f.v.memberlist):
+        remove(f.v.memberlist)
+
+    if path.exists(f.v.memberreportlist):
+        remove(f.v.memberreportlist)
+
+    assert f.weeklyservices().display() == f.v.fileerror
+    assert f.service().display() == f.v.fileerror
+    assert f.provider().display() == f.v.fileerror
+    assert f.member().display() == f.v.fileerror
+
+    # set up other files
+    assert f.member().addone(name="brian", number=12345, address="new addr0", city="portland", state="OR", zipcode=97227) is True
+    assert f.member().addone(name="jeoff", number=54321, address="new addr1", city="greshem", state="WA", zipcode=72279) is True
+    assert f.member().addone(name="geoff", number=55551, address="new addr2", city="nowhere", state="XX", zipcode=51515) is True
+
+    assert f.provider().addone(name="dr.1", number=56789, address="new addr2", city="ptown", state="OR", zipcode=5647) is True
+    assert f.provider().addone(name="dr.2", number=98765, address="new addr3", city="gtown", state="WA", zipcode=7465) is True
+
+    assert f.service().addone(name="massage", code=890123, fee=50) is True
+    assert f.service().addone(name="therapy", code=321098, fee=75) is True
+
+    # add some stuffs to weekly services list
+    assert f.weeklyservices().addone(dmonth=10, dday=25, dyear=2014, pnumber=56789, mnumber=12345, code=321098, comments="this is not a comment") is True
+    assert f.weeklyservices().addone(dmonth=10, dday=26, dyear=2013, pnumber=98765, mnumber=54321, code=890123, comments="no comment") is True
+    assert f.weeklyservices().addone(dmonth=10, dday=26, dyear=2013, pnumber=98765, mnumber=54321, code=890123, comments="no comment") is True
+
+    # create a report!
+    assert f.report().memberreport() is True
+
+    # Test this report
+
+    fp = open(f.v.memberreportlist, 'rb')
+    try:
+        mylist = load(fp)
+    except ValueError:
+        print "load failed"
+    fp.close()
+
+    assert str(mylist[0]["city"]) == "portland"
+    assert str(mylist[0]["name"]) == "brian"
+    assert str(mylist[0]["zipcode"]) == "97227"
+    assert str(mylist[0]["number"]) == "12345"
+    assert str(mylist[0]["state"]) == "OR"
+    assert str(mylist[0]["address"]) == "new addr0"
+    assert str(mylist[0]["service list"][0]["date of service"]) == "10-25-2014"
+    assert str(mylist[0]["service list"][0]["service name"]) == "therapy"
+    assert str(mylist[0]["service list"][0]["provider name"]) == "dr.1"
+
+    assert str(mylist[1]["city"]) == "greshem"
+    assert str(mylist[1]["name"]) == "jeoff"
+    assert str(mylist[1]["zipcode"]) == "72279"
+    assert str(mylist[1]["number"]) == "54321"
+    assert str(mylist[1]["state"]) == "WA"
+    assert str(mylist[1]["address"]) == "new addr1"
+    assert str(mylist[1]["service list"][0]["date of service"]) == "10-26-2013"
+    assert str(mylist[1]["service list"][0]["service name"]) == "massage"
+    assert str(mylist[1]["service list"][0]["provider name"]) == "dr.2"
+    assert str(mylist[1]["service list"][1]["date of service"]) == "10-26-2013"
+    assert str(mylist[1]["service list"][1]["service name"]) == "massage"
+    assert str(mylist[1]["service list"][1]["provider name"]) == "dr.2"
+
+    # keeping around just in case, currently our code does not include members without services for the week
+    # assert str(mylist[2]["city"]) == "nowhere"
+    # assert str(mylist[2]["name"]) == "geoff"
+    # assert str(mylist[2]["zipcode"]) == "51515"
+    # assert str(mylist[2]["number"]) == "55551"
+    # assert str(mylist[2]["state"]) == "XX"
+    # assert str(mylist[2]["address"]) == "new addr2"
+
+    # clean up after test
+    if path.exists(f.v.weekservicelist):
+        remove(f.v.weekservicelist)
+
+    if path.exists(f.v.servicelist):
+        remove(f.v.servicelist)
+
+    if path.exists(f.v.providerlist):
+        remove(f.v.providerlist)
+
+    if path.exists(f.v.memberlist):
+        remove(f.v.memberlist)
+
+    if path.exists(f.v.memberreportlist):
+        remove(f.v.memberreportlist)
+
+
+def providerreporttest():
+    """Test the provider report maker."""
     # We have to fill some data first!!!
     # clean up after test
     if path.exists(f.v.weekservicelist):
@@ -668,6 +781,7 @@ def memberreporttest():
 
     assert f.provider().addone(name="dr.1", number=56789, address="new addr2", city="ptown", state="OR", zipcode=5647) is True
     assert f.provider().addone(name="dr.2", number=98765, address="new addr3", city="gtown", state="WA", zipcode=7465) is True
+    assert f.provider().addone(name="dr.3", number=54545, address="new addr4", city="nada", state="YY", zipcode=56565) is True
 
     assert f.service().addone(name="massage", code=890123, fee=50) is True
     assert f.service().addone(name="therapy", code=321098, fee=75) is True
@@ -675,9 +789,60 @@ def memberreporttest():
     # add some stuffs to weekly services list
     assert f.weeklyservices().addone(dmonth=10, dday=25, dyear=2014, pnumber=56789, mnumber=12345, code=321098, comments="this is not a comment") is True
     assert f.weeklyservices().addone(dmonth=10, dday=26, dyear=2013, pnumber=98765, mnumber=54321, code=890123, comments="no comment") is True
+    assert f.weeklyservices().addone(dmonth=10, dday=26, dyear=2013, pnumber=98765, mnumber=54321, code=890123, comments="no comment") is True
 
     # create a report!
-    assert f.report().memberreport() is True
+    assert f.report().providerreport() is True
+
+    # Test this report
+
+    fp = open(f.v.providerreportlist, 'rb')
+    try:
+        mylist = load(fp)
+    except ValueError:
+        print "load failed"
+    fp.close()
+
+    assert str(mylist[0]["city"]) == "ptown"
+    assert str(mylist[0]["name"]) == "dr.1"
+    assert str(mylist[0]["zipcode"]) == "5647"
+    assert str(mylist[0]["number"]) == "56789"
+    assert str(mylist[0]["state"]) == "OR"
+    assert str(mylist[0]["address"]) == "new addr2"
+    assert str(mylist[0]["total number of consultations"]) == "1"
+    assert str(mylist[0]["total fee for week"]) == "75"
+    assert str(mylist[0]["service list"][0]["member number"]) == "12345"
+    assert str(mylist[0]["service list"][0]["date of service"]) == "10-25-2014"
+    assert str(mylist[0]["service list"][0]["service fee"]) == "75"
+    assert str(mylist[0]["service list"][0]["service name"]) == "therapy"
+    assert str(mylist[0]["service list"][0]["member name"]) == "brian"
+
+    assert str(mylist[1]["city"]) == "gtown"
+    assert str(mylist[1]["name"]) == "dr.2"
+    assert str(mylist[1]["zipcode"]) == "7465"
+    assert str(mylist[1]["number"]) == "98765"
+    assert str(mylist[1]["state"]) == "WA"
+    assert str(mylist[1]["address"]) == "new addr3"
+    assert str(mylist[1]["total number of consultations"]) == "2"
+    assert str(mylist[1]["total fee for week"]) == "100"
+    assert str(mylist[1]["service list"][0]["member number"]) == "54321"
+    assert str(mylist[1]["service list"][0]["date of service"]) == "10-26-2013"
+    assert str(mylist[1]["service list"][0]["service fee"]) == "50"
+    assert str(mylist[1]["service list"][0]["service name"]) == "massage"
+    assert str(mylist[1]["service list"][0]["member name"]) == "jeoff"
+    assert str(mylist[1]["service list"][1]["member number"]) == "54321"
+    assert str(mylist[1]["service list"][1]["date of service"]) == "10-26-2013"
+    assert str(mylist[1]["service list"][1]["service fee"]) == "50"
+    assert str(mylist[1]["service list"][1]["service name"]) == "massage"
+    assert str(mylist[1]["service list"][1]["member name"]) == "jeoff"
+
+    # keeping around just in case, currently our code does not include members without services for the week
+    # assert str(mylist[2]["city"]) == "nowhere"
+    # assert str(mylist[2]["name"]) == "geoff"
+    # assert str(mylist[2]["zipcode"]) == "51515"
+    # assert str(mylist[2]["number"]) == "55551"
+    # assert str(mylist[2]["state"]) == "XX"
+    # assert str(mylist[2]["address"]) == "new addr2"
 
     # clean up after test
     if path.exists(f.v.weekservicelist):
@@ -692,6 +857,105 @@ def memberreporttest():
     if path.exists(f.v.memberlist):
         remove(f.v.memberlist)
 
+    if path.exists(f.v.providerreportlist):
+        remove(f.v.providerreportlist)
+
+
+def summaryreporttest():
+    """test the summary report maker."""
+    # start clean
+    if path.exists(f.v.weekservicelist):
+        remove(f.v.weekservicelist)
+
+    if path.exists(f.v.servicelist):
+        remove(f.v.servicelist)
+
+    if path.exists(f.v.providerlist):
+        remove(f.v.providerlist)
+
+    if path.exists(f.v.memberlist):
+        remove(f.v.memberlist)
+
+    if path.exists(f.v.memberreportlist):
+        remove(f.v.memberreportlist)
+
+    if path.exists(f.v.providerreportlist):
+        remove(f.v.providerreportlist)
+
+    if path.exists(f.v.summaryreportlist):
+        remove(f.v.summaryreportlist)
+
+    # build suitable structure to report on -------------------------------------------------------------------------------------------------------------------
+    assert f.weeklyservices().display() == f.v.fileerror
+    assert f.service().display() == f.v.fileerror
+    assert f.provider().display() == f.v.fileerror
+    assert f.member().display() == f.v.fileerror
+
+    # set up other files
+    assert f.member().addone(name="brian", number=12345, address="new addr0", city="portland", state="OR", zipcode=97227) is True
+    assert f.member().addone(name="jeoff", number=54321, address="new addr1", city="greshem", state="WA", zipcode=72279) is True
+
+    assert f.provider().addone(name="dr.1", number=56789, address="new addr2", city="ptown", state="OR", zipcode=5647) is True
+    assert f.provider().addone(name="dr.2", number=98765, address="new addr3", city="gtown", state="WA", zipcode=7465) is True
+    assert f.provider().addone(name="dr.3", number=54545, address="new addr4", city="nada", state="YY", zipcode=56565) is True
+
+    assert f.service().addone(name="massage", code=890123, fee=50) is True
+    assert f.service().addone(name="therapy", code=321098, fee=75) is True
+
+    # add some stuffs to weekly services list
+    assert f.weeklyservices().addone(dmonth=10, dday=25, dyear=2014, pnumber=56789, mnumber=12345, code=321098, comments="this is not a comment") is True
+    assert f.weeklyservices().addone(dmonth=10, dday=26, dyear=2013, pnumber=98765, mnumber=54321, code=890123, comments="no comment") is True
+    assert f.weeklyservices().addone(dmonth=10, dday=26, dyear=2013, pnumber=98765, mnumber=54321, code=890123, comments="no comment") is True
+
+    # create a report!
+    assert f.report().providerreport() is True
+
+    # end build suitable structure to report on ---------------------------------------------------------------------------------------------------------------
+
+    # this is the whole test so far
+    f.report().summaryreport()
+
+    # test file
+    fp = open(f.v.summaryreportlist, 'rb')
+    try:
+        mylist = load(fp)
+    except ValueError:
+        print "load failed"
+    fp.close()
+
+    assert mylist[0]["total overall week fee"] == "175"
+    assert mylist[0]["total number of providers who provided services"] == 2
+    assert mylist[0]["total number of consultations"] == 3
+
+    assert mylist[1]["provider name"] == "dr.1"
+    assert mylist[1]["number of consulations"] == 1
+    assert mylist[1]["total fee for week for this provider"] == "75"
+
+    assert mylist[2]["provider name"] == "dr.2"
+    assert mylist[2]["number of consulations"] == 2
+    assert mylist[2]["total fee for week for this provider"] == "100"
+
+    # end clean
+    if path.exists(f.v.weekservicelist):
+        remove(f.v.weekservicelist)
+
+    if path.exists(f.v.servicelist):
+        remove(f.v.servicelist)
+
+    if path.exists(f.v.providerlist):
+        remove(f.v.providerlist)
+
+    if path.exists(f.v.memberlist):
+        remove(f.v.memberlist)
+
+    if path.exists(f.v.memberreportlist):
+        remove(f.v.memberreportlist)
+
+    if path.exists(f.v.providerreportlist):
+        remove(f.v.providerreportlist)
+
+    if path.exists(f.v.summaryreportlist):
+        remove(f.v.summaryreportlist)
 
 # run main----------------------------------------------------
 
@@ -721,6 +985,8 @@ def main():
     deleteallweeklyservicestest()
 
     memberreporttest()
+    providerreporttest()
+    summaryreporttest()
 
 
 # done with main
