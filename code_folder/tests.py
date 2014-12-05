@@ -957,6 +957,55 @@ def summaryreporttest():
     if path.exists(f.v.summaryreportlist):
         remove(f.v.summaryreportlist)
 
+# prepopulate data to do command line stuff with ------------------------------------------
+
+
+def prepopulatedata():
+    """Prepopulate some data to work on the command line."""
+    # start clean
+    if path.exists(f.v.weekservicelist):
+        remove(f.v.weekservicelist)
+
+    if path.exists(f.v.servicelist):
+        remove(f.v.servicelist)
+
+    if path.exists(f.v.providerlist):
+        remove(f.v.providerlist)
+
+    if path.exists(f.v.memberlist):
+        remove(f.v.memberlist)
+
+    if path.exists(f.v.memberreportlist):
+        remove(f.v.memberreportlist)
+
+    if path.exists(f.v.providerreportlist):
+        remove(f.v.providerreportlist)
+
+    if path.exists(f.v.summaryreportlist):
+        remove(f.v.summaryreportlist)
+
+    # confirm empty files
+    assert f.weeklyservices().display() == f.v.fileerror
+    assert f.service().display() == f.v.fileerror
+    assert f.provider().display() == f.v.fileerror
+    assert f.member().display() == f.v.fileerror
+
+    # set up files
+    assert f.member().addone(name="brian", number=12345, address="new addr0", city="portland", state="OR", zipcode=97227) is True
+    assert f.member().addone(name="jeoff", number=54321, address="new addr1", city="greshem", state="WA", zipcode=72279) is True
+
+    assert f.provider().addone(name="dr.1", number=56789, address="new addr2", city="ptown", state="OR", zipcode=5647) is True
+    assert f.provider().addone(name="dr.2", number=98765, address="new addr3", city="gtown", state="WA", zipcode=7465) is True
+    assert f.provider().addone(name="dr.3", number=54545, address="new addr4", city="nada", state="YY", zipcode=56565) is True
+
+    assert f.service().addone(name="massage", code=890123, fee=50) is True
+    assert f.service().addone(name="therapy", code=321098, fee=75) is True
+
+    # add some stuffs to weekly services list
+    assert f.weeklyservices().addone(dmonth=10, dday=25, dyear=2014, pnumber=56789, mnumber=12345, code=321098, comments="this is not a comment") is True
+    assert f.weeklyservices().addone(dmonth=10, dday=26, dyear=2013, pnumber=98765, mnumber=54321, code=890123, comments="no comment") is True
+    assert f.weeklyservices().addone(dmonth=10, dday=26, dyear=2013, pnumber=98765, mnumber=54321, code=890123, comments="no comment") is True
+
 # run main----------------------------------------------------
 
 
@@ -987,6 +1036,8 @@ def main():
     memberreporttest()
     providerreporttest()
     summaryreporttest()
+
+    prepopulatedata()
 
 
 # done with main
