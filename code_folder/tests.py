@@ -66,7 +66,7 @@ def displaymembertest():
     # commented out display test since I don't want to see it every time, uncomment to test
     f.member().addone(name="joe", number=12345678, address="101 n whatever street", city="portland", state="OR", zipcode=12345)
     f.member().addone(name="jeff", number=9876543, address="new address", city="greshem", state="WA", zipcode=543)
-    assert f.member().display() is True
+    # assert f.member().display() is True
 
     # clean up after test
     if path.exists(f.v.memberlist):
@@ -224,9 +224,9 @@ def displayprovidertest():
     fp.close()  # close 'cuz we don't really need it
     assert f.provider().display() == f.v.displayerror
     # commented out display test since I don't want to see it every time, uncomment to test
-    f.provider().addone(name="joe", number=12345678, address="101 n whatever street", city="portland", state="OR", zipcode=12345)
-    f.provider().addone(name="jeff", number=9876543, address="new address", city="greshem", state="WA", zipcode=543)
-    assert f.provider().display() is True
+    f.provider().addone(name="provider0", number=12345678, address="101 n whatever street", city="portland", state="OR", zipcode=12345)
+    f.provider().addone(name="provider1", number=9876543, address="new address", city="greshem", state="WA", zipcode=543)
+    # assert f.provider().display() is True
 
     # clean up after test
     if path.exists(f.v.providerlist):
@@ -377,9 +377,9 @@ def displayservicetest():
     fp.close()  # close 'cuz we don't really need it
     assert f.service().display() == f.v.displayerror
     # commented out display test since I don't want to see it every time, uncomment to test
-    f.service().addone(name="massage", code=12345678, address="101 n whatever street", city="portland", state="OR", fee=400.00)
-    f.service().addone(name="jeff", code=9876543, address="new address", city="greshem", state="WA", fee=543)
-    assert f.service().display() is True
+    f.service().addone(name="massage", code=12345678, fee=400.00)
+    f.service().addone(name="jeff", code=123456, fee=543)
+    # assert f.service().display() is True
 
     # clean up after test
     if path.exists(f.v.servicelist):
@@ -560,13 +560,33 @@ def displayweeklyservicestest():
     fp.close()  # close 'cuz we don't really need it
     assert f.weeklyservices().display() == f.v.displayerror
     # commented out display test since I don't want to see it every time, uncomment to test
-    f.service().addone(name="massage", code=12345678, address="101 n whatever street", city="portland", state="OR", fee=400.00)
-    f.service().addone(name="jeff", code=9876543, address="new address", city="greshem", state="WA", fee=543)
-    assert f.service().display() is True
+    # set up other files
+    assert f.member().addone(name="brian", number=12345, address="new addr0", city="portland", state="OR", zipcode=97227) is True
+    assert f.member().addone(name="jeoff", number=54321, address="new addr1", city="greshem", state="WA", zipcode=72279) is True
+
+    assert f.provider().addone(name="dr.1", number=56789, address="new addr2", city="ptown", state="OR", zipcode=5647) is True
+    assert f.provider().addone(name="dr.2", number=98765, address="new addr3", city="gtown", state="WA", zipcode=7465) is True
+
+    assert f.service().addone(name="massage", code=890123, fee=50) is True
+    assert f.service().addone(name="therapy", code=321098, fee=75) is True
+
+    # add some stuffs
+    f.weeklyservices().addone(dmonth=10, dday=25, dyear=2014, pnumber=56789, mnumber=12345, code=321098, comments="this is not a comment")
+    f.weeklyservices().addone(dmonth=10, dday=26, dyear=2013, pnumber=98765, mnumber=54321, code=890123, comments="no comment")
+    # assert f.weeklyservices().display() is True
 
     # clean up after test
     if path.exists(f.v.weekservicelist):
         remove(f.v.weekservicelist)
+
+    if path.exists(f.v.servicelist):
+        remove(f.v.servicelist)
+
+    if path.exists(f.v.providerlist):
+        remove(f.v.providerlist)
+
+    if path.exists(f.v.memberlist):
+        remove(f.v.memberlist)
 
 
 def deleteallweeklyservicestest():
@@ -618,6 +638,61 @@ def deleteallweeklyservicestest():
     if path.exists(f.v.memberlist):
         remove(f.v.memberlist)
 
+# tests of report() class -------------------------------------------------------------
+
+
+def memberreporttest():
+    """Test the member report maker."""
+    # We have to fill some data first!!!
+    # clean up after test
+    if path.exists(f.v.weekservicelist):
+        remove(f.v.weekservicelist)
+
+    if path.exists(f.v.servicelist):
+        remove(f.v.servicelist)
+
+    if path.exists(f.v.providerlist):
+        remove(f.v.providerlist)
+
+    if path.exists(f.v.memberlist):
+        remove(f.v.memberlist)
+
+    assert f.weeklyservices().display() == f.v.fileerror
+    assert f.service().display() == f.v.fileerror
+    assert f.provider().display() == f.v.fileerror
+    assert f.member().display() == f.v.fileerror
+
+    # set up other files
+    assert f.member().addone(name="brian", number=12345, address="new addr0", city="portland", state="OR", zipcode=97227) is True
+    assert f.member().addone(name="jeoff", number=54321, address="new addr1", city="greshem", state="WA", zipcode=72279) is True
+
+    assert f.provider().addone(name="dr.1", number=56789, address="new addr2", city="ptown", state="OR", zipcode=5647) is True
+    assert f.provider().addone(name="dr.2", number=98765, address="new addr3", city="gtown", state="WA", zipcode=7465) is True
+
+    assert f.service().addone(name="massage", code=890123, fee=50) is True
+    assert f.service().addone(name="therapy", code=321098, fee=75) is True
+
+    # add some stuffs to weekly services list
+    assert f.weeklyservices().addone(dmonth=10, dday=25, dyear=2014, pnumber=56789, mnumber=12345, code=321098, comments="this is not a comment") is True
+    assert f.weeklyservices().addone(dmonth=10, dday=26, dyear=2013, pnumber=98765, mnumber=54321, code=890123, comments="no comment") is True
+
+    # create a report!
+    assert f.report().memberreport() is True
+
+    # clean up after test
+    if path.exists(f.v.weekservicelist):
+        remove(f.v.weekservicelist)
+
+    if path.exists(f.v.servicelist):
+        remove(f.v.servicelist)
+
+    if path.exists(f.v.providerlist):
+        remove(f.v.providerlist)
+
+    if path.exists(f.v.memberlist):
+        remove(f.v.memberlist)
+
+
 # run main----------------------------------------------------
 
 
@@ -644,6 +719,8 @@ def main():
     addoneweeklyservicestest()
     displayweeklyservicestest()
     deleteallweeklyservicestest()
+
+    memberreporttest()
 
 
 # done with main

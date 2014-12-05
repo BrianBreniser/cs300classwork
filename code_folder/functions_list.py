@@ -10,10 +10,18 @@ class v(object):
 
     """standard (v)ariables and error messages and used in this program."""
 
+    # data files
     memberlist = "memberlist.json"
     providerlist = "providerlist.json"
     servicelist = "servicelist.json"
-    weekservicelist = "weekservicelist"
+    weekservicelist = "weekservicelist.json"
+
+    # report files
+    memberreportlist = "memberreportlist.json"
+    providerreportlist = "memberreportlist.json"
+    summaryreportlist = "memberreportlist.json"
+
+    # error codes
     fileerror = "fileerror"
     displayerror = "displayerror"
     alreadyfound = "alreadyfound"
@@ -133,12 +141,12 @@ class member(object):
             else:
                 print ""
                 for m in displaylist:
-                    print m["name"]
-                    print "    " + m["number"]
-                    print "    " + m["address"]
-                    print "    " + m["city"]
-                    print "    " + m["state"]
-                    print "    " + m["zipcode"]
+                    print str(m["name"])
+                    print "    " + str(m["number"])
+                    print "    " + str(m["address"])
+                    print "    " + str(m["city"])
+                    print "    " + str(m["state"])
+                    print "    " + str(m["zipcode"])
                     print ""
         return True
 
@@ -270,12 +278,12 @@ class provider(object):
             else:
                 print ""
                 for m in displaylist:
-                    print m["name"]
-                    print "    " + m["number"]
-                    print "    " + m["address"]
-                    print "    " + m["city"]
-                    print "    " + m["state"]
-                    print "    " + m["zipcode"]
+                    print str(m["name"])
+                    print "    " + str(m["number"])
+                    print "    " + str(m["address"])
+                    print "    " + str(m["city"])
+                    print "    " + str(m["state"])
+                    print "    " + str(m["zipcode"])
                     print ""
         return True
 
@@ -401,9 +409,9 @@ class service(object):
             else:
                 print ""
                 for m in displaylist:
-                    print m["name"]
-                    print "    " + m["code"]
-                    print "    $" + m["fee"]
+                    print str(m["name"])
+                    print "    " + str(m["code"])
+                    print "    $" + str(m["fee"])
                     print ""
         return True
 
@@ -584,12 +592,12 @@ class weeklyservices(object):
             else:
                 print ""
                 for m in displaylist:
-                    print m["currentdate"]
-                    print m["dateofservice"]
-                    print m["pnumber"]
-                    print m["mnumber"]
-                    print m["code"]
-                    print m["comments"]
+                    print str(m["currentdate"])
+                    print str(m["dateofservice"])
+                    print str(m["pnumber"])
+                    print str(m["mnumber"])
+                    print str(m["code"])
+                    print str(m["comments"])
                     print ""
         return True
 
@@ -659,9 +667,13 @@ class report(object):
 
     """report functions for member, provider, and summary."""
 
-    def memberreport():
+    def memberreport(self):
         """member report function, creates external json file with report."""
-        # first things is first, load up the files we need
+        # Start clean, with an empty file before running each report
+        if path.exists(v.servicelist):
+            remove(v.servicelist)
+
+        # load up the files we will use
         providerlist = h().checkfileandreturnlist(filename=v.providerlist)
         if providerlist is False:
             return False
@@ -674,49 +686,40 @@ class report(object):
         if servicelist is False:
             return False
 
-        weeklyserviceslist = h().checkfileandreturnlist(filename=v.weeklyserviceslist)
-        if weeklyserviceslist is False:
+        weekservicelist = h().checkfileandreturnlist(filename=v.weekservicelist)
+        if weekservicelist is False:
             return False
 
-        for m in memberlist:
-            print "hello world"
+        # create a copy of our memberlist to make modifications
+        modifiedmemberlist = memberlist
 
+        # enter a loop to build the services each member got, and add that to our new services list
+        for m in modifiedmemberlist:  # loop through our member list
+            m["service list"] = []  # always add an initiated empty list to each member
+            for w in weekservicelist:  # loop through weekly services list
+                if w["mnumber"] == m["number"]:  # if we find one for our member number, that means they got a service this cycle
+                    newservice = {}  # create a new service dict to fill info into
+                    newservice["date of service"] = w["dateofservice"]  # and fill it with date of service
+                    for p in providerlist:  # then find associated provider in providers list (from weekly service)
+                        print p["number"]
+                        if w["pnumber"] == p["number"]:  # if found
+                            newservice["provider name"] = p["name"]  # add their name
+                            break  # we can stop looking now
+                    for s in servicelist:  # we need the services name now too
+                        print s["code"]
+                        print s["name"]
+                        print s["fee"]
+                        if w["code"] == s["code"]:  # so find the code
+                            newservice["service name"] = s["name"]  # add its name
+                            break  # we can stop looking now
+                    m["service list"].append(newservice)  # we need to add this service to a running list of services for each member
+                    continue  # keep looking, find ALL services for each member
+        # ^^ holy shit I think we're done
 
+        # gotta write it to the file
+        return h().writedatatofile(filename=v.memberreportlist, data=modifiedmemberlist)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def providerreport():
+    def providerreport(self):
         """providerreport function, creates external json file with report."""
         # first things is first, load up the files we need
         providerlist = h().checkfileandreturnlist(filename=v.providerlist)
@@ -731,11 +734,11 @@ class report(object):
         if servicelist is False:
             return False
 
-        weeklyserviceslist = h().checkfileandreturnlist(filename=v.weeklyserviceslist)
-        if weeklyserviceslist is False:
+        weekservicelist = h().checkfileandreturnlist(filename=v.weekservicelist)
+        if weekservicelist is False:
             return False
 
-    def summaryreport():
+    def summaryreport(self):
         """summary  report function, creates external json file with report."""
         # first things is first, load up the files we need
         providerlist = h().checkfileandreturnlist(filename=v.providerlist)
@@ -750,6 +753,6 @@ class report(object):
         if servicelist is False:
             return False
 
-        weeklyserviceslist = h().checkfileandreturnlist(filename=v.weeklyserviceslist)
-        if weeklyserviceslist is False:
+        weekservicelist = h().checkfileandreturnlist(filename=v.weekservicelist)
+        if weekservicelist is False:
             return False
